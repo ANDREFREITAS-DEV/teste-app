@@ -1,6 +1,9 @@
 import { $, show, hide } from "../core/dom.js";
 import { state } from "../core/state.js";
 
+/* ===============================
+   APPLY STORE HEADER + THEME
+================================ */
 export function applyStoreThemeAndHeader() {
   const cfg = state.storeConfig;
 
@@ -16,11 +19,17 @@ export function applyStoreThemeAndHeader() {
   if (cfg.logo_url) $("#store-logo").src = cfg.logo_url;
 
   if (cfg.endereco) {
-    const rua = cfg.endereco.split(",")[0];
-    $("#header-address-short").innerText = rua;
+    $("#header-address-short").innerText = cfg.endereco.split(",")[0];
+  }
+
+  if (cfg.chave_pix) {
+    $("#store-pix-key").value = cfg.chave_pix;
   }
 }
 
+/* ===============================
+   STORE INFO MODAL
+================================ */
 export function bindStoreInfoModal() {
   const modal = $("#modal-info");
 
@@ -30,8 +39,11 @@ export function bindStoreInfoModal() {
     $("#info-logo").src = cfg.logo_url || "https://placehold.co/100";
     $("#info-name").innerText = cfg.nome_fantasia || "Minha Loja";
     $("#info-address").innerText = cfg.endereco || "Endereço não informado";
-    $("#info-hours").innerText = cfg.horario_funcionamento || "Horário não informado";
-    $("#info-phone").innerText = cfg.whatsapp ? `WhatsApp: ${cfg.whatsapp}` : "Contato não informado";
+    $("#info-hours").innerText =
+      cfg.horario_funcionamento || "Horário não informado";
+    $("#info-phone").innerText = cfg.whatsapp
+      ? `WhatsApp: ${cfg.whatsapp}`
+      : "Contato não informado";
 
     show(modal);
   });
@@ -43,8 +55,9 @@ export function bindStoreInfoModal() {
   });
 }
 
-import { $ } from "../core/dom.js";
-
+/* ===============================
+   HEADER SHRINK EFFECT
+================================ */
 export function bindHeaderShrink() {
   const header = $("#hero-header");
 

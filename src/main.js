@@ -5,7 +5,7 @@ import { toast } from "./core/dom.js";
 import { getClienteBySlug } from "./infra/tenant.repo.js";
 import { getStoreConfig } from "./infra/store-config.repo.js";
 
-import { applyStoreThemeAndHeader, bindStoreInfoModal } from "./ui/store.ui.js";
+
 import { loadAndRenderMenu } from "./ui/menu.ui.js";
 import { bindProductModal } from "./ui/product-modal.ui.js";
 import { bindCartUI, updateBadge } from "./ui/cart.ui.js";
