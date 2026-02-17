@@ -1,0 +1,83 @@
+novo zapflow saas		banco esta no andre_ssplive.com
+
+supabase URL			https://mhgstfuguvcpovuycwwj.supabase.co
+chave publica			sb_publishable_9u3JbdNjw_FFgGRKGSxePw_FAWaAzvx
+anon public			eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1oZ3N0ZnVndXZjcG92dXljd3dqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2NzgxNTcsImV4cCI6MjA4NDI1NDE1N30.qRgaaoCaU41nnKBd8DsX0loB3CFmkj3mLjvUqsiuzzU
+chave secreta			eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1oZ3N0ZnVndXZjcG92dXljd3dqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODY3ODE1NywiZXhwIjoyMDg0MjU0MTU3fQ.xoIu9I3zWp7_UrwcNt5kfyYkfkQXFlXWu9KGVl8GIlE
+sempre roda o servidor		npx http-server .
+admin1@loja.com         123456
+524b31b6-3fe6-4f8d-911a-d245226f1c1c id
+
+524b31b6-3fe6-4f8d-911a-d245226f1c1c cliente id
+
+TODOS PROJETOS DEVE TER :
+vercel.json (Configuração de Rotas)
+service-worker.js (O Motor Offline)
+manifest.json (A Identidade do App)
+index.html (Meta Tags Finais)  Elas garantem que o app funcione bem em iPhones (iOS) e Androids.
+
+
+
+
+
+Deploy da Function: Rode supabase functions deploy criar-admin-cliente
+ou 	npx supabase functions deploy criar-admin-cliente --no-verify-jwt
+tabela usuario:
+usuario 	teste1@gmail.com	senha: 123456	campo role: admin_saas	id f7f3cee6-c9c0-4ec5-87fd-73c271f99113
+tabela cliente:
+slug 		cliente-teste		id aa531c99-bede-4fda-8f96-44a7a1cf702c  name Cliente Teste
+
+USUARIO CRIADO PARA TESTA NA TELA ADMIN CLIENTE
+admin1@loja.com		123456		
+admin2@loja.com		123456 ?
+
+****tem que ser feito antes de subir para vercel**********
+Como você abriu espaço para sugestões de robustez e prevenção de erros silenciosos, antes de pularmos para as Configurações, aqui vão 3 dicas rápidas que podemos implementar gradualmente (sem quebrar o que já funciona) para elevar o nível do SaaS:
+
+Máscaras de Input (UX/Segurança): Atualmente o usuário digita o preço "livre". Seria muito mais robusto usar uma biblioteca leve (como SimpleMaskMoney ou IMask) para forçar o formato R$ 0,00. Isso evita erros de conversão (ponto vs vírgula) no banco de dados.
+
+Feedback de Conexão (Offline): Se a internet do dono do restaurante cair, ele pode tentar salvar e achar que funcionou. Podemos adicionar um pequeno ouvinte window.addEventListener('offline', ...) para bloquear o botão de salvar e avisar: "Você está offline".
+
+Tratamento de Erros Centralizado: Em vez de repetir try/catch e Toastify em toda função, podemos criar uma função utilitária tryAction(callback) que padroniza todos os erros. Se der erro, ela avisa o usuário e registra o erro no console de forma detalhada para você (desenvolvedor) saber onde foi.
+
+Podemos aplicar essas melhorias aos poucos.
+
+*********analisar essa melhorias**********
+2 sugestões de melhoria para as Configurações que podemos implementar no futuro (sem pressa, para não perder o foco agora):
+
+Botão "Forçar Abertura/Fechamento": Hoje sua loja abre/fecha pelo horário. Mas e se acabar o gás? Ou se for feriado e quiser abrir mais cedo? Um botão manual ("Loja Aberta" / "Loja Fechada") que sobrepõe o horário é essencial para a operação real.
+
+Geração de QR Code Pix: Hoje salvamos a chave Pix. O "pulo do gato" seria gerar o QR Code automaticamente no checkout do cliente final, para ele só apontar a câmera e pagar, sem ter que copiar e colar a chave.
+
+
+*********************************************
+
+
+src/
+│
+├── admin-saas/                # VOCÊ (master do sistema)
+│   ├── index.html
+│   ├── main.js                # orquestrador único
+│   ├── ui.js                  # renderização DOM
+│   ├── data.js                # queries Supabase
+│   └── state.js               # estado local (sem lógica)
+│
+├── admin-cliente/             # DONO DA LOJA
+│   ├── index.html
+│   ├── main.js                # bootstrap + fluxo
+│   ├── ui.js                  # render da tela
+│   ├── data.js                # SELECT/UPDATE config, produtos
+│   └── state.js               # CURRENT_USER, CURRENT_STORE
+│
+├── app-cliente/               # USUÁRIO FINAL (pedido)
+│   ├── index.html
+│   ├── main.js                # fluxo do app
+│   ├── ui.js                  # cards, carrinho
+│   ├── data.js                # produtos, pedidos
+│   └── state.js               # carrinho, sessão local
+│
+└── shared/                    # CAMADA COMPARTILHADA
+    ├── supabaseClient.js      # somente cria o client
+    ├── auth.js                # login, logout, session
+    ├── guards.js              # valida role, cliente_id
+    └── utils.js               # helpers puros

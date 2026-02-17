@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Cardápio Digital</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+  <link rel="icon" type="image/png" href="icon.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <meta name="theme-color" content="#F97316" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Cardápio" />
+
+  <meta property="og:title" content="Faça seu Pedido Online" />
+  <meta property="og:description" content="Acesse nosso cardápio digital e peça agora pelo WhatsApp!" />
+  <meta property="og:image" content="https://placehold.co/600x400/F97316/white?text=Cardapio+Digital" />
+  <meta property="og:type" content="website" />
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+  <header id="hero-header" class="relative pt-8 pb-12 px-4 rounded-b-[2.5rem] shadow-lg mb-6 overflow-hidden transition-colors duration-300" style="background-color: #333;">
+    <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/food.png')]"></div>
+
+    <div class="relative z-10 flex flex-col items-center text-center">
+      <div class="relative mb-3">
+        <img id="store-logo" src="https://placehold.co/100" class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md bg-white" />
+        <div id="store-status" class="absolute bottom-0 right-0 transform translate-y-1/4"></div>
+      </div>
+
+      <h1 id="store-name" class="font-bold text-2xl text-white leading-tight drop-shadow-md">Carregando...</h1>
+      <p class="text-white/90 text-sm mt-1 flex items-center gap-1 justify-center">
+        <i class="fa-solid fa-location-dot"></i> <span id="header-address-short">...</span>
+      </p>
+    </div>
+  </header>
+
+  <main id="menu-container" class="px-4 container mx-auto max-w-lg min-h-[60vh]"></main>
+
+  <nav id="bottom-nav" class="fixed bottom-0 left-0 right-0 border-t border-white/10 shadow-[0_-5px_15px_rgba(0,0,0,0.1)] h-20 px-8 flex justify-between items-center z-40 pb-2 transition-colors duration-300" style="background-color: #333;">
+
+    <button id="btn-scroll-top" class="flex flex-col items-center gap-1 text-white/80 hover:text-white transition p-2">
+      <i class="fa-solid fa-utensils text-xl"></i>
+      <span class="text-[10px] font-bold">Cardápio</span>
+    </button>
+
+    <div class="relative -top-6">
+      <button id="btn-cart-center" class="bg-white text-gray-800 w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transform transition active:scale-95 border-4 border-gray-100 relative">
+        <i class="fa-solid fa-basket-shopping text-2xl" id="icon-cart-center"></i>
+
+        <span id="nav-cart-price" class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-green-600 text-white text-[10px] font-bold px-2 py-1 rounded-full border-2 border-white shadow-md whitespace-nowrap hidden animate-bounce">
+          R$ 0,00
+        </span>
+      </button>
+    </div>
+
+    <button id="btn-open-store" class="flex flex-col items-center gap-1 text-white/80 hover:text-white transition p-2">
+      <i class="fa-solid fa-store text-xl"></i>
+      <span class="text-[10px] font-bold">Loja</span>
+    </button>
+  </nav>
+
+  <!-- MODAL INFO LOJA -->
+  <div id="modal-info" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4 animate-fade-in-up">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden relative">
+      <button id="btn-close-info" class="absolute top-3 right-3 w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200">
+        <i class="fa-solid fa-times"></i>
+      </button>
+
+      <div class="bg-gray-50 p-6 text-center border-b border-gray-100">
+        <img id="info-logo" src="" class="w-20 h-20 rounded-full mx-auto mb-3 border border-gray-200" />
+        <h2 id="info-name" class="font-bold text-xl text-gray-800">Loja</h2>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-location-dot"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm text-gray-800">Endereço</h4>
+            <p id="info-address" class="text-sm text-gray-500">...</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center flex-shrink-0">
+            <i class="fa-regular fa-clock"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm text-gray-800">Horário</h4>
+            <p id="info-hours" class="text-sm text-gray-500">...</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-green-50 text-green-500 flex items-center justify-center flex-shrink-0">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm text-gray-800">Contato</h4>
+            <p id="info-phone" class="text-sm text-gray-500">...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PRODUTO -->
+  <div id="modal-product" class="fixed inset-0 bg-black/70 hidden z-50 flex items-end sm:items-center justify-center backdrop-blur-sm transition-opacity">
+    <div class="bg-white w-full sm:max-w-md h-[90vh] sm:h-auto sm:rounded-2xl rounded-t-3xl shadow-2xl animate-fade-in-up flex flex-col overflow-hidden">
+
+      <div class="relative h-48 bg-gray-100 flex-shrink-0">
+        <img id="p-modal-img" src="" class="w-full h-full object-cover" />
+        <button id="btn-close-product" class="absolute top-4 right-4 w-9 h-9 bg-white/90 rounded-full shadow-md flex items-center justify-center text-gray-800 hover:bg-white">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+
+      <div class="p-5 flex-1 overflow-y-auto">
+        <div class="mb-4">
+          <h3 id="p-modal-title" class="font-bold text-2xl text-gray-900 leading-tight mb-1">Nome</h3>
+          <p id="p-modal-desc" class="text-sm text-gray-500 line-clamp-3 mb-2">Descrição</p>
+          <div id="p-modal-price" class="font-bold text-xl text-orange-600">R$ 0,00</div>
+        </div>
+
+        <div id="p-modal-options" class="space-y-4"></div>
+      </div>
+
+      <div class="p-4 border-t border-gray-100 bg-gray-50 flex items-center gap-4">
+        <div class="flex items-center bg-white rounded-xl border border-gray-200 h-12 shadow-sm">
+          <button id="btn-modal-qtd-minus" class="w-10 h-full text-gray-600 hover:bg-gray-50 rounded-l-xl text-lg font-bold">-</button>
+          <span id="p-modal-qtd" class="w-8 text-center font-bold text-gray-800">1</span>
+          <button id="btn-modal-qtd-plus" class="w-10 h-full text-green-600 hover:bg-green-50 rounded-r-xl text-lg font-bold">+</button>
+        </div>
+
+        <button id="btn-add-modal" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold h-12 px-4 rounded-xl shadow-lg flex justify-between items-center transition disabled:opacity-50 disabled:cursor-not-allowed">
+          <span>Adicionar</span><span>R$ 0,00</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CARRINHO -->
+  <div id="modal-cart" class="fixed inset-0 bg-black/60 hidden z-50 flex items-end sm:items-center justify-center backdrop-blur-sm transition-opacity">
+    <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl animate-fade-in-up max-h-[95vh] flex flex-col">
+
+      <div class="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50 rounded-t-3xl sm:rounded-t-2xl">
+        <h2 class="font-bold text-lg text-gray-800">
+          <i class="fa-solid fa-receipt mr-2 text-orange-500"></i> Seu Pedido
+        </h2>
+        <button id="btn-close-cart" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-red-100 hover:text-red-500 flex items-center justify-center transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div id="cart-items" class="overflow-y-auto flex-1 p-4 space-y-4 bg-white"></div>
+
+      <div class="bg-gray-50 p-5 border-t border-gray-200 overflow-y-auto max-h-[60vh]">
+
+        <div class="mb-5">
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Observações Gerais</label>
+          <textarea id="input-obs-geral" rows="2"
+            class="w-full p-3 rounded-xl border border-gray-200 text-sm focus:ring-orange-500 focus:border-orange-500"
+            placeholder="Ex: Casa do fundo, Sem cebola..."></textarea>
+        </div>
+
+        <div class="mb-5">
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Entrega ou Retirada?</label>
+          <div class="flex bg-white p-1 rounded-xl border border-gray-200">
+            <button id="btn-delivery" class="flex-1 py-3 rounded-lg text-sm font-bold bg-orange-100 text-orange-700 shadow-sm transition border border-orange-200 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-motorcycle"></i> Entrega
+            </button>
+            <button id="btn-pickup" class="flex-1 py-3 rounded-lg text-sm font-bold text-gray-500 hover:bg-gray-50 transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-bag-shopping"></i> Retirada
+            </button>
+          </div>
+        </div>
+
+        <div id="address-group" class="mb-5 space-y-3 animate-fade-in-up">
+          <input type="text" id="input-rua" placeholder="Endereço (Rua, Número)"
+            class="w-full p-3.5 rounded-xl border border-gray-200 focus:border-orange-500 text-sm shadow-sm" />
+          <input type="text" id="input-bairro" placeholder="Bairro"
+            class="w-full p-3.5 rounded-xl border border-gray-200 focus:border-orange-500 text-sm shadow-sm" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-5">
+          <input type="text" id="input-nome" placeholder="Seu Nome"
+            class="w-full p-3.5 rounded-xl border border-gray-200 focus:border-orange-500 text-sm shadow-sm" />
+          <input type="tel" id="input-tel" placeholder="WhatsApp"
+            class="w-full p-3.5 rounded-xl border border-gray-200 focus:border-orange-500 text-sm shadow-sm" />
+        </div>
+
+        <div class="mb-5">
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Forma de Pagamento</label>
+          <div class="grid grid-cols-3 gap-2 mb-3">
+            <button id="pay-pix" class="pay-btn p-3 rounded-xl border border-gray-200 bg-white hover:border-orange-400 transition flex flex-col items-center gap-1 group">
+              <i class="fa-brands fa-pix text-xl text-teal-600 group-hover:scale-110 transition"></i>
+              <span class="text-xs font-bold text-gray-600">Pix</span>
+            </button>
+
+            <button id="pay-money" class="pay-btn p-3 rounded-xl border border-gray-200 bg-white hover:border-orange-400 transition flex flex-col items-center gap-1 group">
+              <i class="fa-solid fa-money-bill-wave text-xl text-green-600 group-hover:scale-110 transition"></i>
+              <span class="text-xs font-bold text-gray-600">Dinheiro</span>
+            </button>
+
+            <button id="pay-card" class="pay-btn p-3 rounded-xl border border-gray-200 bg-white hover:border-orange-400 transition flex flex-col items-center gap-1 group">
+              <i class="fa-solid fa-credit-card text-xl text-blue-600 group-hover:scale-110 transition"></i>
+              <span class="text-xs font-bold text-gray-600">Cartão</span>
+            </button>
+          </div>
+
+          <div id="field-troco" class="hidden animate-fade-in-up">
+            <div class="relative">
+              <span class="absolute left-3 top-3.5 text-gray-400 text-sm">R$</span>
+              <input type="number" id="input-troco" placeholder="Troco para quanto?"
+                class="w-full pl-10 p-3 rounded-xl border-orange-300 bg-orange-50 text-sm focus:ring-orange-500 font-bold text-gray-700" />
+            </div>
+          </div>
+
+          <div id="field-pix" class="hidden p-4 bg-teal-50 border border-teal-100 rounded-xl animate-fade-in-up text-center">
+            <p class="text-xs text-teal-700 mb-2 font-bold">Chave Pix:</p>
+            <div class="flex items-center gap-2">
+              <input type="text" id="store-pix-key" readonly
+                class="w-full bg-white text-xs p-2.5 rounded-lg border border-teal-200 text-gray-600 font-mono shadow-sm"
+                value="Carregando..." />
+              <button id="btn-copy-pix" class="bg-teal-600 hover:bg-teal-700 text-white p-2.5 rounded-lg text-xs font-bold shadow-sm active:scale-95 transition">
+                <i class="fa-regular fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-4 space-y-1 text-sm">
+          <div class="flex justify-between text-gray-500"><span>Subtotal:</span><span id="resumo-subtotal">R$ 0,00</span></div>
+          <div class="flex justify-between text-gray-500" id="row-taxa"><span>Taxa de Entrega:</span><span id="resumo-taxa">R$ 0,00</span></div>
+          <div class="flex justify-between text-xl font-bold text-gray-900 mt-2 pt-2 border-t border-dashed border-gray-200">
+            <span>Total Final:</span><span id="resumo-total" class="text-green-600">R$ 0,00</span>
+          </div>
+        </div>
+
+        <button id="btn-send" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition flex justify-center items-center gap-2 group mb-4">
+          <span>Confirmar Pedido</span>
+          <i class="fa-brands fa-whatsapp text-xl group-hover:animate-bounce"></i>
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
