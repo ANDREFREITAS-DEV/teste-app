@@ -10,6 +10,9 @@ import { loadAndRenderMenu } from "./ui/menu.ui.js";
 import { bindProductModal } from "./ui/product-modal.ui.js";
 import { bindCartUI, updateBadge } from "./ui/cart.ui.js";
 
+import { applyStoreThemeAndHeader, bindStoreInfoModal, bindHeaderShrink } from "./ui/store.ui.js";
+
+
 // ===============================
 // ✅ DEV MODE AUTOMÁTICO (Preview)
 // ===============================
@@ -56,6 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     applyStoreThemeAndHeader();
 
     bindStoreInfoModal();
+    bindHeaderShrink(); // ✅ novo
     bindProductModal();
     bindCartUI();
 

@@ -42,3 +42,17 @@ export function bindStoreInfoModal() {
     if (e.target === modal) hide(modal);
   });
 }
+
+import { $ } from "../core/dom.js";
+
+export function bindHeaderShrink() {
+  const header = $("#hero-header");
+
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 60) {
+      header.classList.add("shrink");
+    } else {
+      header.classList.remove("shrink");
+    }
+  });
+}
