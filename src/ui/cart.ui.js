@@ -62,9 +62,16 @@ export function updateBadge() {
   if (state.cart.length > 0) {
     badge.innerText = `R$ ${total.toFixed(2)}`;
     badge.classList.remove("hidden");
+
+    // ✅ ativa animação
+    badge.classList.add("pulse-badge");
   } else {
     badge.classList.add("hidden");
+
+    // remove animação
+    badge.classList.remove("pulse-badge");
   }
+
 }
 
 export function openCart() {
@@ -262,6 +269,13 @@ async function finalizarPedido() {
     updateBadge();
     renderCart();
     closeCart();
+
+    // limpa obs
+    $("#input-obs-geral").value = "";
+
+    // ✅ destrava botão imediatamente
+    btn.innerText = original;
+    btn.disabled = false;
 
     return;
   }

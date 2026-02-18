@@ -74,6 +74,11 @@ body {
   margin-top: -10px;
 }
 
+/* Logo menor no topo */
+#store-logo {
+  width: 85px !important;
+  height: 85px !important;
+}
 
 /* Nome menor */
 #store-name {
@@ -165,3 +170,32 @@ body {
   height: 90px;
 }
 
+/* ===============================
+   CART BADGE PULSE (valor saltando)
+================================ */
+
+#nav-cart-price {
+  animation: cartPulse 1.2s infinite;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+@keyframes cartPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+}
+
+.pulse-badge {
+  animation: cartPulse 1.2s infinite;
+}
