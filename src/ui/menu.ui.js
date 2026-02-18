@@ -6,6 +6,12 @@ import { getCategorias, getProdutosAtivos } from "../infra/products.repo.js";
 export async function loadAndRenderMenu() {
   const container = $("#menu-container");
   const tabsInner = $("#category-tabs-inner");
+  const searchInput = $("#search-input");
+
+  /* ===============================
+     0) Skeleton Loader (antes de carregar)
+  ================================ */
+  container.innerHTML = renderSkeleton();
 
   const { data: categorias } = await getCategorias(state.clienteId);
   const { data: produtos } = await getProdutosAtivos(state.clienteId);
@@ -36,66 +42,7 @@ export async function loadAndRenderMenu() {
   /* ===============================
      2) Render Menu Sections
   ================================ */
-  let html = "";
-
-  categorias.forEach((cat) => {
-    const prods = produtos.filter((p) => p.categoria_id === cat.id);
-    if (!prods.length) return;
-
-    html += `
-      <section
-        class="mb-10 category-section"
-        id="cat-${cat.id}"
-      >
-        <h3 class="font-bold text-xl text-gray-800 mb-4">
-          ${cat.nome}
-        </h3>
-
-        <div class="grid grid-cols-1 gap-4">
-          ${prods
-            .map((p) => {
-              state.productsMap[p.id] = p;
-              const imgSafe = p.imagem_url || "https://placehold.co/150";
-
-              return `
-                <button
-                  type="button"
-                  data-product-id="${p.id}"
-                  class="text-left bg-white p-3 rounded-2xl shadow-sm border flex gap-4 w-full"
-                >
-                  <img
-                    src="${imgSafe}"
-                    class="w-24 h-24 object-cover rounded-xl"
-                  />
-
-                  <div class="flex-1">
-                    <h4 class="font-bold text-gray-900">${p.nome}</h4>
-                    <p class="text-xs text-gray-500 mt-1 line-clamp-2">
-                      ${p.descricao || ""}
-                    </p>
-
-                    <div class="flex justify-between items-end mt-2">
-                      <span class="font-bold text-lg text-theme">
-                        R$ ${p.preco.toFixed(2)}
-                      </span>
-
-                      <span
-                        class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center"
-                      >
-                        <i class="fa-solid fa-plus"></i>
-                      </span>
-                    </div>
-                  </div>
-                </button>
-              `;
-            })
-            .join("")}
-        </div>
-      </section>
-    `;
-  });
-
-  container.innerHTML = html;
+  renderFullMenu(categorias, produtos);
 
   /* ===============================
      3) Click Produto → Modal
@@ -119,13 +66,12 @@ export async function loadAndRenderMenu() {
 
     const catId = tab.getAttribute("data-tab");
 
-    // ativa visualmente
     tabsInner.querySelectorAll(".tab-btn").forEach((b) => {
       b.classList.remove("active");
     });
+
     tab.classList.add("active");
 
-    // scroll suave
     document
       .getElementById("cat-" + catId)
       .scrollIntoView({ behavior: "smooth", block: "start" });
@@ -153,4 +99,137 @@ export async function loadAndRenderMenu() {
   );
 
   sections.forEach((sec) => observer.observe(sec));
+
+  /* ===============================
+     6) Busca Instantânea + UX Premium
+  ================================ */
+  searchInput.addEventListener("input", () => {
+    const term = normalize(searchInput.value);
+
+    const tabs = document.getElementById("category-tabs");
+
+    // ✅ Se não tem busca → volta menu normal + tabs aparecem
+    if (!term) {
+      tabs.style.display = "block";
+      renderFullMenu(categorias, produtos);
+      return;
+    }
+
+    // ✅ Se está buscando → esconde tabs igual iFood
+    tabs.style.display = "none";
+
+    // filtra produtos (nome + descrição)
+    const filtrados = produtos.filter((p) => {
+      const nome = normalize(p.nome);
+      const desc = normalize(p.descricao || "");
+
+      return nome.includes(term) || desc.includes(term);
+    });
+
+    renderSearchResults(filtrados);
+  });
+
+  /* ===============================
+     Helpers Render
+  ================================ */
+  function renderFullMenu(cats, prods) {
+    let html = "";
+
+    cats.forEach((cat) => {
+      const items = prods.filter((p) => p.categoria_id === cat.id);
+      if (!items.length) return;
+
+      html += `
+        <section class="mb-10 category-section" id="cat-${cat.id}">
+          <h3 class="font-bold text-xl text-gray-800 mb-4">
+            ${cat.nome}
+          </h3>
+
+          <div class="grid gap-4">
+            ${items.map(renderProductCard).join("")}
+          </div>
+        </section>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function renderSearchResults(items) {
+    container.innerHTML = `
+      <h3 class="font-bold text-lg text-gray-700 mb-4 px-1">
+        Resultados da busca:
+      </h3>
+
+      <div class="grid gap-4">
+        ${
+          items.length
+            ? items.map(renderProductCard).join("")
+            : `<div class="text-gray-400 text-center py-10">Nenhum produto encontrado.</div>`
+        }
+      </div>
+    `;
+  }
+
+  function renderProductCard(p) {
+    state.productsMap[p.id] = p;
+    const imgSafe = p.imagem_url || "https://placehold.co/150";
+
+    return `
+      <button
+        type="button"
+        data-product-id="${p.id}"
+        class="text-left bg-white p-3 rounded-2xl shadow-sm border flex gap-4 w-full"
+      >
+        <img
+          src="${imgSafe}"
+          class="w-24 h-24 object-cover rounded-xl"
+        />
+
+        <div class="flex-1">
+          <h4 class="font-bold text-gray-900">${p.nome}</h4>
+          <p class="text-xs text-gray-500 mt-1 line-clamp-2">
+            ${p.descricao || ""}
+          </p>
+
+          <div class="flex justify-between items-end mt-2">
+            <span class="font-bold text-lg text-theme">
+              R$ ${p.preco.toFixed(2)}
+            </span>
+
+            <span
+              class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center"
+            >
+              <i class="fa-solid fa-plus"></i>
+            </span>
+          </div>
+        </div>
+      </button>
+    `;
+  }
+}
+
+/* ===============================
+   Skeleton Generator
+================================ */
+function renderSkeleton() {
+  return `
+    <div class="space-y-4">
+      ${Array.from({ length: 6 })
+        .map(
+          () => `
+        <div class="skeleton skeleton-card w-full"></div>
+      `
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+function normalize(text) {
+  return text
+    .toLowerCase()
+    .normalize("NFD") // remove acentos
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
 }
