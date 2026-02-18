@@ -39,11 +39,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   console.log("🚀 ZapFlow iniciando...");
 
   try {
-    state.cart = loadCart();updateBadge();
+    // 1) carregar carrinho primeiro
+    state.cart = loadCart();
 
-    // ✅ AQUI
+    // 2) detectar loja
     state.storeSlug = DEV_SLUG || detectSlug();
-
     console.log("🏪 SLUG USADO:", state.storeSlug);
 
     const { data: cliente, error: errCliente } =
@@ -55,18 +55,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     state.clienteId = cliente.id;
 
+    // 3) carregar config
     const { data: cfg } = await getStoreConfig(state.clienteId);
     state.storeConfig = cfg || {};
 
+    // 4) aplicar tema
     applyStoreThemeAndHeader();
 
+    // 5) bind UI primeiro
     bindStoreInfoModal();
-    bindHeaderShrink(); // ✅ novo
+    bindHeaderShrink();
     bindProductModal();
     bindCartUI();
 
-    await loadAndRenderMenu();
+    // ✅ agora DOM existe → badge funciona
     updateBadge();
+
+    // 6) render menu
+    await loadAndRenderMenu();
+
+    // 7) sincronizar pedidos offline em background
+    syncPendingOrders();
+
+    window.addEventListener("online", () => {
+      syncPendingOrders();
+    });
 
     console.log("✅ App pronto!");
 
@@ -74,15 +87,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Erro fatal:", e);
     toast(e.message || "Erro fatal", false);
   }
-
-  console.log("✅ App pronto!");
-
-  // ✅ tenta sincronizar pedidos offline quando abrir (sem travar UI)
-  syncPendingOrders();
-
-  // ✅ sincroniza automaticamente quando internet voltar
-  window.addEventListener("online", () => {
-    syncPendingOrders();
-  });
-
 });
+
+
