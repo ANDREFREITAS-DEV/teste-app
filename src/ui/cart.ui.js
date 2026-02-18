@@ -5,6 +5,7 @@ import { changeQty, removeAt } from "../domain/cart.service.js";
 import { calcTotals } from "../domain/totals.service.js";
 import { buildWhatsappMessage } from "../domain/whatsapp.service.js";
 import { insertPedido, insertItensPedido } from "../infra/orders.repo.js";
+import { enqueueOrder } from "../core/offline-queue.js"
 
 export function bindCartUI() {
   $("#btn-cart-center").addEventListener("click", openCart);
@@ -212,6 +213,59 @@ async function finalizarPedido() {
 
     const entregaTexto = state.deliveryMode === "delivery" ? "ENTREGA DELIVERY" : "RETIRAR NO BALCÃO";
     const codigo = Math.floor(1000 + Math.random() * 9000).toString();
+
+
+    // ===============================
+  // ✅ OFFLINE MODE (Fila local)
+  // ===============================
+  if (!navigator.onLine) {
+    enqueueOrder({
+      pedidoPayload: {
+        cliente_id: state.clienteId,
+
+        nome_cliente: nome,
+        telefone_cliente: tel,
+
+        endereco_rua: state.deliveryMode === "delivery" ? rua : null,
+        endereco_bairro: state.deliveryMode === "delivery" ? bairro : null,
+
+        observacao: obsGeral || null,
+        tipo_entrega: state.deliveryMode,
+
+        pagamento_metodo: state.paymentMethod,
+        pagamento_troco:
+          state.paymentMethod === "Dinheiro" && troco
+            ? parseFloat(troco)
+            : 0,
+
+        total: total,
+        status: "pendente_offline",
+        codigo: codigo,
+      },
+
+      itensPayload: state.cart.map((item) => ({
+        produto_id: item.id,
+        nome: item.nome,
+        quantidade: item.qtd,
+        preco: item.preco,
+        total: item.preco * item.qtd,
+        obs: "",
+        detalhes: item.obs || [],
+      })),
+    });
+
+    toast("📦 Pedido salvo offline! Será enviado quando voltar internet.");
+
+    // limpa carrinho
+    state.cart = [];
+    saveCart(state.cart);
+    updateBadge();
+    renderCart();
+    closeCart();
+
+    return;
+  }
+
 
     // 1) pedido
     const { data: pedido, error: erroPedido } = await insertPedido({

@@ -12,6 +12,8 @@ import { bindCartUI, updateBadge } from "./ui/cart.ui.js";
 
 import { applyStoreThemeAndHeader, bindStoreInfoModal, bindHeaderShrink } from "./ui/store.ui.js";
 
+import { syncPendingOrders } from "./domain/offline.service.js";
+
 
 // ===============================
 // ✅ DEV MODE AUTOMÁTICO (Preview)
@@ -72,4 +74,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Erro fatal:", e);
     toast(e.message || "Erro fatal", false);
   }
+
+  console.log("✅ App pronto!");
+
+  // ✅ tenta sincronizar pedidos offline quando abrir (sem travar UI)
+  syncPendingOrders();
+
+  // ✅ sincroniza automaticamente quando internet voltar
+  window.addEventListener("online", () => {
+    syncPendingOrders();
+  });
+
 });
