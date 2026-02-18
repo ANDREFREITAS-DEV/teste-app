@@ -64,7 +64,7 @@ body {
 
   /* ✅ diminui altura inicial */
   padding-top: 10px !important;
-  padding-bottom: 18px !important;
+  padding-bottom: 10px !important;
 
   /* deixa mais compacto */
   border-radius: 0 0 2rem 2rem;
@@ -149,4 +149,5 @@ body {
 .skeleton-card {
   height: 90px;
 }
+
 
