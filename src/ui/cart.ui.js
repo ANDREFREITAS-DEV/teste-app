@@ -55,23 +55,31 @@ export function bindCartUI() {
   $("#btn-send").addEventListener("click", finalizarPedido);
 }
 
+let lastTotal = null;
+
 export function updateBadge() {
   const total = state.cart.reduce((acc, i) => acc + i.preco * i.qtd, 0);
   const badge = $("#nav-cart-price");
 
-  if (state.cart.length > 0) {
-    badge.innerText = `R$ ${total.toFixed(2)}`;
-    badge.classList.remove("hidden");
-
-    // ✅ ativa animação
-    badge.classList.add("pulse-badge");
-  } else {
+  // carrinho vazio
+  if (state.cart.length === 0) {
     badge.classList.add("hidden");
-
-    // remove animação
-    badge.classList.remove("pulse-badge");
+    lastTotal = 0;
+    return;
   }
 
+  // mostrar badge
+  badge.classList.remove("hidden");
+  badge.innerText = `R$ ${total.toFixed(2)}`;
+
+  // ✅ anima apenas se mudou o valor
+  if (lastTotal !== null && total !== lastTotal) {
+    badge.classList.remove("pulse-once"); // reset
+    void badge.offsetWidth; // força reflow
+    badge.classList.add("pulse-once");
+  }
+
+  lastTotal = total;
 }
 
 export function openCart() {

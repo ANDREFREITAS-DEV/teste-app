@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   console.log("🚀 ZapFlow iniciando...");
 
   try {
-    state.cart = loadCart();
+    state.cart = loadCart();updateBadge();
 
     // ✅ AQUI
     state.storeSlug = DEV_SLUG || detectSlug();
