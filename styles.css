@@ -63,8 +63,8 @@ body {
   transition: all 0.25s ease;
 
   /* ✅ diminui altura inicial */
-  padding-top: 20px !important;
-  padding-bottom: 28px !important;
+  padding-top: 10px !important;
+  padding-bottom: 18px !important;
 
   /* deixa mais compacto */
   border-radius: 0 0 2rem 2rem;
@@ -149,3 +149,4 @@ body {
 .skeleton-card {
   height: 90px;
 }
+
