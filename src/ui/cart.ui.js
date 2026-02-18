@@ -219,7 +219,7 @@ async function finalizarPedido() {
     const { sub, taxa, total } = calcTotals(state.cart, state.deliveryMode, state.storeConfig);
 
     const entregaTexto = state.deliveryMode === "delivery" ? "ENTREGA DELIVERY" : "RETIRAR NO BALCÃO";
-    const codigo = Math.floor(1000 + Math.random() * 9000).toString();
+    
 
 
     // ===============================
@@ -247,7 +247,7 @@ async function finalizarPedido() {
 
         total: total,
         status: "pendente_offline",
-        codigo: codigo,
+        
       },
 
       itensPayload: state.cart.map((item) => ({
@@ -299,10 +299,14 @@ async function finalizarPedido() {
 
       total: total,
       status: "novo",
-      codigo: codigo,
+      
     });
 
     if (erroPedido) throw erroPedido;
+
+    // ✅ número oficial sequencial do banco
+    const numeroPedido = pedido.numero_pedido;
+
 
     // 2) itens
     const itens = state.cart.map((item) => ({
@@ -323,7 +327,7 @@ async function finalizarPedido() {
 
     // 3) whatsapp
     const msg = buildWhatsappMessage({
-      codigo,
+      codigo: numeroPedido,
       nome,
       tel,
       entregaTexto,
