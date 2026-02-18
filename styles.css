@@ -64,7 +64,7 @@ body {
 
   /* ✅ diminui altura inicial */
   padding-top: 10px !important;
-  padding-bottom: 10px !important;
+  padding-bottom: 18px !important;
 
   /* deixa mais compacto */
   border-radius: 0 0 2rem 2rem;
@@ -72,6 +72,22 @@ body {
 
 #category-tabs {
   margin-top: -10px;
+}
+
+/* Logo menor no topo */
+#store-logo {
+  width: 85px !important;
+  height: 85px !important;
+}
+
+/* Nome menor */
+#store-name {
+  font-size: 22px !important;
+}
+
+/* Endereço menor */
+#header-address-short {
+  font-size: 12px !important;
 }
 
 
@@ -153,6 +169,3 @@ body {
 .skeleton-card {
   height: 90px;
 }
-
-
-
