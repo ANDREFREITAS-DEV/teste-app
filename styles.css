@@ -70,6 +70,10 @@ body {
   border-radius: 0 0 2rem 2rem;
 }
 
+#category-tabs {
+  margin-top: -10px;
+}
+
 
 #hero-header.shrink {
   padding-top: 12px !important;
@@ -149,5 +153,6 @@ body {
 .skeleton-card {
   height: 90px;
 }
+
 
 
