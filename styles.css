@@ -74,11 +74,6 @@ body {
   margin-top: -10px;
 }
 
-/* Logo menor no topo */
-#store-logo {
-  width: 85px !important;
-  height: 85px !important;
-}
 
 /* Nome menor */
 #store-name {
@@ -169,3 +164,4 @@ body {
 .skeleton-card {
   height: 90px;
 }
+
