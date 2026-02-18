@@ -73,7 +73,9 @@ export function updateBadge() {
   badge.innerText = `R$ ${total.toFixed(2)}`;
 
   // ✅ anima apenas se mudou o valor
-  if (lastTotal !== null && total !== lastTotal) {
+  // ✅ anima apenas se mudou e já existia valor antes
+if (lastTotal > 0 && total !== lastTotal) {
+
     badge.classList.remove("pulse-once"); // reset
     void badge.offsetWidth; // força reflow
     badge.classList.add("pulse-once");
