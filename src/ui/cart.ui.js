@@ -281,8 +281,9 @@ async function finalizarPedido() {
 
     toast("📦 Pedido salvo offline! Será enviado quando voltar internet.");
 
-    // limpa carrinho
+    // limpa carrinho (via store)
     cartClear();
+    closeCart();
 
 
     // limpa obs
@@ -357,12 +358,10 @@ async function finalizarPedido() {
       obsGeral
     });
 
-    // limpar carrinho
-    state.cart = [];
-    saveCart(state.cart);
-    updateBadge();
-    renderCart();
+    // limpar carrinho (via store)
+    cartClear();
     closeCart();
+
 
     $("#input-obs-geral").value = "";
 
