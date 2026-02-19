@@ -27,6 +27,10 @@ const ASSETS_TO_CACHE = [
   "./src/ui/menu.ui.js",
   "./src/ui/product-modal.ui.js",
   "./src/ui/cart.ui.js",
+
+  "./src/core/offline-queue.js",
+  "./src/domain/offline.service.js",
+
 ];
 
 self.addEventListener("install", (event) => {
