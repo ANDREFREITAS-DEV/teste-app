@@ -1,7 +1,14 @@
 import { $, show, hide, toast } from "../core/dom.js";
 import { state } from "../core/state.js";
-import { saveCart } from "../core/storage.js";
-import { changeQty, removeAt } from "../domain/cart.service.js";
+
+import {
+  subscribeCart,
+  cartChangeQty,
+  cartRemove,
+  cartClear,
+} from "../core/cart.store.js";
+
+
 import { calcTotals } from "../domain/totals.service.js";
 import { buildWhatsappMessage } from "../domain/whatsapp.service.js";
 import { insertPedido, insertItensPedido } from "../infra/orders.repo.js";
@@ -30,13 +37,16 @@ export function bindCartUI() {
 
     if (Number.isNaN(idx)) return;
 
-    if (action === "minus") changeQty(state.cart, idx, -1);
-    if (action === "plus") changeQty(state.cart, idx, 1);
-    if (action === "remove") removeAt(state.cart, idx);
+    if (action === "minus") cartChangeQty(idx, -1);
+    if (action === "plus") cartChangeQty(idx, 1);
+    if (action === "remove") cartRemove(idx);
 
-    saveCart(state.cart);
-    renderCart();
-    updateBadge();
+    subscribeCart(() => {
+      renderCart();
+      updateBadge();
+    });
+
+
   });
 
   // Entrega / retirada
@@ -272,11 +282,8 @@ async function finalizarPedido() {
     toast("📦 Pedido salvo offline! Será enviado quando voltar internet.");
 
     // limpa carrinho
-    state.cart = [];
-    saveCart(state.cart);
-    updateBadge();
-    renderCart();
-    closeCart();
+    cartClear();
+
 
     // limpa obs
     $("#input-obs-geral").value = "";

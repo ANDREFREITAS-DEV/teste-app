@@ -1,8 +1,10 @@
 import { $, $$, show, hide, toast } from "../core/dom.js";
-import { state } from "../core/state.js";
+
 import { getGruposOpcionaisByProduto } from "../infra/optionals.repo.js";
-import { addToCart, makeCartItem } from "../domain/cart.service.js";
-import { saveCart } from "../core/storage.js";
+
+import { makeCartItem } from "../domain/cart.service.js";
+import { cartAdd } from "../core/cart.store.js";
+
 
 let CURRENT_PRODUCT = null;
 let SELECTED_OPTIONS = [];
@@ -68,9 +70,9 @@ function addSimple(product) {
     qtd: 1
   });
 
-  addToCart(state.cart, item);
-  saveCart(state.cart);
+  cartAdd(item);
   toast("Adicionado ao carrinho!");
+
 }
 
 function renderGroups(grupos) {
@@ -265,11 +267,11 @@ function confirmAdd() {
     qtd: ITEM_QTD
   });
 
-  addToCart(state.cart, item);
-  saveCart(state.cart);
+  cartAdd(item);
 
   toast("Adicionado ao carrinho!");
   closeProductModal();
+
 }
 
 function closeProductModal() {
