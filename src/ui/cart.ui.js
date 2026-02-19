@@ -8,11 +8,9 @@ import {
   cartClear,
 } from "../core/cart.store.js";
 
+import { submitOrder } from "../app/order.controller.js";
 
 import { calcTotals } from "../domain/totals.service.js";
-import { buildWhatsappMessage } from "../domain/whatsapp.service.js";
-import { insertPedido, insertItensPedido } from "../infra/orders.repo.js";
-import { enqueueOrder } from "../core/offline-queue.js"
 
 export function bindCartUI() {
   $("#btn-cart-center").addEventListener("click", openCart);
@@ -209,171 +207,42 @@ function copyPix() {
 }
 
 async function finalizarPedido() {
-  // captura campos
   const val = (id) => ($("#" + id)?.value || "").trim();
 
-  const nome   = val("input-nome");
-  const tel    = val("input-tel");
-  const rua    = val("input-rua");
-  const bairro = val("input-bairro");
-  const troco  = val("input-troco");
-  const obsGeral = val("input-obs-geral");
-
-  if (!state.cart.length) return toast("Carrinho vazio!", false);
-  if (!nome || !tel) return toast("Informe Nome e WhatsApp!", false);
-
-  if (state.deliveryMode === "delivery" && (!rua || !bairro)) {
-    return toast("Endereço obrigatório!", false);
-  }
-
-  if (!state.paymentMethod) return toast("Selecione pagamento!", false);
+  const formData = {
+    nome: val("input-nome"),
+    tel: val("input-tel"),
+    rua: val("input-rua"),
+    bairro: val("input-bairro"),
+    troco: val("input-troco"),
+    obsGeral: val("input-obs-geral"),
+  };
 
   const btn = $("#btn-send");
   const original = btn.innerText;
+
   btn.innerText = "Enviando...";
   btn.disabled = true;
 
   try {
-    const { sub, taxa, total } = calcTotals(state.cart, state.deliveryMode, state.storeConfig);
-
-    const entregaTexto = state.deliveryMode === "delivery" ? "ENTREGA DELIVERY" : "RETIRAR NO BALCÃO";
-    
-
-
-    // ===============================
-  // ✅ OFFLINE MODE (Fila local)
-  // ===============================
-  if (!navigator.onLine) {
-    enqueueOrder({
-      pedidoPayload: {
-        cliente_id: state.clienteId,
-
-        nome_cliente: nome,
-        telefone_cliente: tel,
-
-        endereco_rua: state.deliveryMode === "delivery" ? rua : null,
-        endereco_bairro: state.deliveryMode === "delivery" ? bairro : null,
-
-        observacao: obsGeral || null,
-        tipo_entrega: state.deliveryMode,
-
-        pagamento_metodo: state.paymentMethod,
-        pagamento_troco:
-          state.paymentMethod === "Dinheiro" && troco
-            ? parseFloat(troco)
-            : 0,
-
-        total: total,
-        status: "pendente_offline",
-        
-      },
-
-      itensPayload: state.cart.map((item) => ({
-        produto_id: item.id,
-        nome: item.nome,
-        quantidade: item.qtd,
-        preco: item.preco,
-        total: item.preco * item.qtd,
-        obs: "",
-        detalhes: item.obs || [],
-      })),
-    });
-
-    toast("📦 Pedido salvo offline! Será enviado quando voltar internet.");
-
-    // limpa carrinho (via store)
-    cartClear();
-    closeCart();
-
-
-    // limpa obs
-    $("#input-obs-geral").value = "";
-
-    // ✅ destrava botão imediatamente
-    btn.innerText = original;
-    btn.disabled = false;
-
-    return;
-  }
-
-
-    // 1) pedido
-    const { data: pedido, error: erroPedido } = await insertPedido({
-      cliente_id: state.clienteId,
-
-      nome_cliente: nome,
-      telefone_cliente: tel,
-
-      endereco_rua: state.deliveryMode === "delivery" ? rua : null,
-      endereco_bairro: state.deliveryMode === "delivery" ? bairro : null,
-
-      observacao: obsGeral || null,
-      tipo_entrega: state.deliveryMode,
-
-      pagamento_metodo: state.paymentMethod,
-      pagamento_troco: (state.paymentMethod === "Dinheiro" && troco) ? parseFloat(troco) : 0,
-
-      total: total,
-      status: "novo",
-      
-    });
-
-    if (erroPedido) throw erroPedido;
-
-    // ✅ número oficial sequencial do banco
-    const numeroPedido = pedido.numero_pedido;
-
-
-    // 2) itens
-    const itens = state.cart.map((item) => ({
-      pedido_id: pedido.id,
-      produto_id: item.id,
-
-      nome: item.nome,
-      quantidade: item.qtd,
-      preco: item.preco,
-      total: item.preco * item.qtd,
-
-      obs: "",
-      detalhes: item.obs || [],
-    }));
-
-    const { error: erroItens } = await insertItensPedido(itens);
-    if (erroItens) throw erroItens;
-
-    // 3) whatsapp
-    const msg = buildWhatsappMessage({
-      codigo: numeroPedido,
-      nome,
-      tel,
-      entregaTexto,
-      rua: state.deliveryMode === "delivery" ? rua : "",
-      bairro: state.deliveryMode === "delivery" ? bairro : "",
-      itens: state.cart,
-      subtotal: sub,
-      taxa,
-      total,
-      pagamento: state.paymentMethod,
-      troco: (state.paymentMethod === "Dinheiro" ? troco : ""),
-      obsGeral
-    });
-
-    // limpar carrinho (via store)
-    cartClear();
-    closeCart();
-
-
-    $("#input-obs-geral").value = "";
+    const result = await submitOrder(formData);
 
     toast("Pedido enviado com sucesso!");
+    closeCart();
 
+    $("#input-obs-geral").value = "";
+
+    // abre WhatsApp
     const zap = state.storeConfig.whatsapp;
-    const linkZap = `https://wa.me/55${zap}?text=${encodeURIComponent(msg)}`;
-    window.open(linkZap, "_blank");
+    const linkZap =
+      `https://wa.me/55${zap}?text=${encodeURIComponent(
+        result.whatsappMessage
+      )}`;
 
+    window.open(linkZap, "_blank");
   } catch (e) {
     console.error("Erro Pedido:", e);
-    toast("Erro ao enviar: " + (e.message || "erro"), false);
+    toast("Erro: " + (e.message || "erro"), false);
   } finally {
     btn.innerText = original;
     btn.disabled = false;

@@ -12,7 +12,6 @@ import { bindCartUI, updateBadge } from "./ui/cart.ui.js";
 
 import { applyStoreThemeAndHeader, bindStoreInfoModal, bindHeaderShrink } from "./ui/store.ui.js";
 
-import { syncPendingOrders } from "./domain/offline.service.js";
 
 
 // ===============================
@@ -73,20 +72,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 6) render menu
     await loadAndRenderMenu();
-
-    // 7) sincronizar pedidos offline em background
-    syncPendingOrders();
-
-    window.addEventListener("online", () => {
-      syncPendingOrders();
-    });
-
+  
     console.log("✅ App pronto!");
 
   } catch (e) {
     console.error("Erro fatal:", e);
     toast(e.message || "Erro fatal", false);
   }
+
+
+
 });
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/service-worker.js");
+}
+
 
 

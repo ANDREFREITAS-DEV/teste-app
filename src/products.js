@@ -2,11 +2,36 @@ import { supabase } from "../supabaseClient.js";
 import { CLIENTE_ID } from "./tenant.js";
 import { openProductModal } from "../product-modal.js";
 
+import { saveCatalog, loadCatalog } from "../core/catalog.cache.js";
+
 export let PRODUCTS_MAP = {};
 
 export async function loadProducts() {
   const container = document.getElementById("menu-container");
 
+  // ===============================
+  // OFFLINE → usa catálogo salvo
+  // ===============================
+  if (!navigator.onLine) {
+    const cached = loadCatalog();
+
+    if (cached?.data) {
+      console.log("📦 Catálogo carregado do cache offline");
+      renderMenu(container, cached.data.categorias, cached.data.produtos);
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="text-center text-gray-400 py-10">
+        ⚠️ Sem internet e nenhum catálogo salvo ainda.
+      </div>
+    `;
+    return;
+  }
+
+  // ===============================
+  // ONLINE → busca Supabase
+  // ===============================
   const { data: categorias } = await supabase
     .from("categorias")
     .select("*")
@@ -20,11 +45,24 @@ export async function loadProducts() {
     .eq("ativo", true);
 
   if (!produtos?.length) {
-    container.innerHTML =
-      `<div class="text-center text-gray-400 py-10">Cardápio vazio.</div>`;
+    container.innerHTML = `
+      <div class="text-center text-gray-400 py-10">
+        Cardápio vazio.
+      </div>
+    `;
     return;
   }
 
+  // ✅ salva cache offline
+  saveCatalog({ categorias, produtos });
+
+  renderMenu(container, categorias, produtos);
+}
+
+// ===============================
+// Renderizador único (online/offline)
+// ===============================
+function renderMenu(container, categorias, produtos) {
   PRODUCTS_MAP = {};
   let html = "";
 
@@ -69,6 +107,7 @@ export async function loadProducts() {
   container.innerHTML = html;
 }
 
+// Click handler global
 window.handleProductClick = (id) => {
   if (PRODUCTS_MAP[id]) openProductModal(PRODUCTS_MAP[id]);
 };
