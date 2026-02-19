@@ -39,12 +39,7 @@ export function bindCartUI() {
     if (action === "plus") cartChangeQty(idx, 1);
     if (action === "remove") cartRemove(idx);
 
-    subscribeCart(() => {
-      renderCart();
-      updateBadge();
-    });
-
-
+    
   });
 
   // Entrega / retirada
@@ -61,6 +56,13 @@ export function bindCartUI() {
 
   // Enviar pedido
   $("#btn-send").addEventListener("click", finalizarPedido);
+
+  // ✅ Listener único global do carrinho (1 vez só)
+  subscribeCart(() => {
+    renderCart();
+    updateBadge();
+  });
+
 }
 
 let lastTotal = null;
@@ -228,7 +230,10 @@ async function finalizarPedido() {
     const result = await submitOrder(formData);
 
     toast("Pedido enviado com sucesso!");
+    cartClear();
+    updateBadge();
     closeCart();
+
 
     $("#input-obs-geral").value = "";
 

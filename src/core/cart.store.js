@@ -59,3 +59,8 @@ export function cartClear() {
   state.cart = [];
   notify();
 }
+
+// 🔥 Força atualização inicial do carrinho carregado do storage
+export function cartHydrate() {
+  notify();
+}

@@ -12,6 +12,7 @@ import { bindCartUI, updateBadge } from "./ui/cart.ui.js";
 
 import { applyStoreThemeAndHeader, bindStoreInfoModal, bindHeaderShrink } from "./ui/store.ui.js";
 
+import { cartHydrate } from "./core/cart.store.js";
 
 
 // ===============================
@@ -80,6 +81,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     toast(e.message || "Erro fatal", false);
   }
 
+  cartHydrate(); // ✅ badge + UI sincronizados na inicialização
 
 
 });
