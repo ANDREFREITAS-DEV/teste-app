@@ -1,64 +1,74 @@
-const CACHE_NAME = "zapflow-client-v2";
-const ASSETS_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./styles.css",
-  "./manifest.json",
-  "./icon.png",
-  "./supabaseClient.js",
+const CACHE_NAME = "zapflow-client-v3";
 
-  "./src/main.js",
+const APP_SHELL = [
+  "/",
+  "/index.html",
+  "/offline.html",
+  "/styles.css",
+  "/manifest.json",
+  "/icon.png",
 
-  "./src/core/state.js",
-  "./src/core/storage.js",
-  "./src/core/dom.js",
+  "/src/main.js",
 
-  "./src/infra/tenant.repo.js",
-  "./src/infra/store-config.repo.js",
-  "./src/infra/products.repo.js",
-  "./src/infra/optionals.repo.js",
-  "./src/infra/orders.repo.js",
+  "/src/core/state.js",
+  "/src/core/storage.js",
+  "/src/core/dom.js",
+  "/src/core/cart.store.js",
+  "/src/core/catalog.cache.js",
 
-  "./src/domain/cart.service.js",
-  "./src/domain/totals.service.js",
-  "./src/domain/whatsapp.service.js",
+  "/src/infra/tenant.repo.js",
+  "/src/infra/store-config.repo.js",
+  "/src/infra/products.repo.js",
+  "/src/infra/optionals.repo.js",
+  "/src/infra/orders.repo.js",
 
-  "./src/ui/store.ui.js",
-  "./src/ui/menu.ui.js",
-  "./src/ui/product-modal.ui.js",
-  "./src/ui/cart.ui.js",
+  "/src/domain/cart.service.js",
+  "/src/domain/totals.service.js",
+  "/src/domain/whatsapp.service.js",
 
-  "./src/core/offline-queue.js",
-  "./src/domain/offline.service.js",
-
+  "/src/ui/store.ui.js",
+  "/src/ui/menu.ui.js",
+  "/src/ui/product-modal.ui.js",
+  "/src/ui/cart.ui.js",
 ];
 
+// INSTALL
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
   self.skipWaiting();
 });
 
+// ACTIVATE
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((names) =>
-      Promise.all(names.map((n) => (n !== CACHE_NAME ? caches.delete(n) : null)))
+    caches.keys().then((keys) =>
+      Promise.all(keys.map((k) => (k !== CACHE_NAME ? caches.delete(k) : null)))
     )
   );
   self.clients.claim();
 });
 
+// FETCH
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET" || event.request.url.includes("supabase.co")) return;
+  if (event.request.method !== "GET") return;
+
+  // não cachear Supabase API
+  if (event.request.url.includes("supabase.co")) return;
 
   event.respondWith(
-    fetch(event.request)
-      .then((res) => {
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        return res;
-      })
-      .catch(() => caches.match(event.request))
+    caches.match(event.request).then((cached) => {
+      // 1) cache first
+      if (cached) return cached;
+
+      // 2) network fallback
+      return fetch(event.request).catch(() => {
+        // 3) fallback offline page
+        if (event.request.mode === "navigate") {
+          return caches.match("/offline.html");
+        }
+      });
+    })
   );
 });
